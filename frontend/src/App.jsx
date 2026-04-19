@@ -5,7 +5,7 @@ import RouletteScreen from './components/RouletteScreen';
 import DatasetCard from './components/DatasetCard';
 import './App.css';
 
-const API_URL = 'http://localhost:5000/api/datasets/random';
+const API_URL = 'https://bizarre-dataset-explorer.onrender.com/api/datasets/random';
 
 function App() {
   const [dataset, setDataset] = useState(null);
