@@ -4,6 +4,8 @@ A roulette-style MERN stack web app that serves up weird, real-world public data
 
 Built as a portfolio project bridging web development and data science fundamentals.
 
+**Live Demo:** https://bizarre-dataset-explorer.vercel.app
+
 ---
 
 ## Tech Stack
