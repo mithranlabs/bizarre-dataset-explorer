@@ -1,0 +1,198 @@
+BIZARRE DATASET EXPLORER — PROJECT DOCUMENTATION
+=================================================
+Submitted as part of portfolio project work.
+Tech Stack: MongoDB, Express.js, React.js, Node.js (MERN)
+
+
+-------------------------------------------------
+1. DEPENDENCIES AND WHAT THEY DO
+-------------------------------------------------
+
+Backend dependencies (installed via: npm install express mongoose cors dotenv):
+
+  express
+    A minimal web framework for Node.js. It handles incoming HTTP requests
+    and lets you define routes (URLs) that your frontend can call. Without
+    Express, you would have to write all that routing logic manually using
+    Node's built-in HTTP module.
+
+  mongoose
+    An ODM — Object Data Modeling library — that acts as a layer between
+    your Node.js code and MongoDB. Instead of writing raw MongoDB queries,
+    you define a Schema (a blueprint for your data) and Mongoose enforces
+    it. For example, it ensures every dataset document always has a title
+    and a description before it is saved to the database.
+
+  cors
+    Stands for Cross-Origin Resource Sharing. Browsers block requests
+    between different ports by default as a security measure. Since the
+    React frontend runs on port 3000 (or 5173 with Vite) and the backend
+    runs on port 5000, they are considered different "origins." The cors
+    package adds the necessary HTTP headers to allow this communication.
+
+  dotenv
+    Loads environment variables from a .env file into the application.
+    This is how sensitive values like the MongoDB connection string are
+    kept out of the source code. The .env file is never committed to
+    GitHub — it stays only on the developer's machine.
+
+Dev dependency (installed via: npm install --save-dev nodemon):
+
+  nodemon
+    A development tool that watches your project files for changes and
+    automatically restarts the Node server whenever you save a file.
+    It is marked as a dev dependency because it is only needed during
+    development, not in a production deployment.
+
+
+-------------------------------------------------
+2. PROJECT FOLDER STRUCTURE
+-------------------------------------------------
+
+The backend follows a pattern called "separation of concerns" — each
+folder has one clear responsibility and does not mix with others.
+
+  config/
+    Contains db.js, which holds the MongoDB connection logic. Keeping
+    this separate means if the connection details ever change (e.g.,
+    switching from a local database to a cloud one), only this one
+    file needs to be updated.
+
+  models/
+    Contains Dataset.js, which defines the Mongoose Schema. A Schema
+    is a formal definition of what a document in the database must look
+    like — what fields it has, what types they are, and which ones are
+    required. Think of it as the contract between your application and
+    your database.
+
+  routes/
+    Contains datasets.js, which defines the API endpoints. A route maps
+    a URL path and an HTTP method (like GET) to a specific function that
+    handles the request and sends back a response.
+
+  seed/
+    Contains seed.js, a one-time script used to populate the database
+    with manually curated data. It is not part of the running server —
+    it is executed separately using "npm run seed" and then left alone.
+
+  server.js
+    The entry point of the entire backend. It starts the Express
+    application, connects to the database, registers the routes, and
+    begins listening for incoming requests on a specified port.
+
+  .env
+    Stores secret or environment-specific values (database URI, port
+    number). This file is listed in .gitignore and is never pushed to
+    version control.
+
+
+-------------------------------------------------
+3. KEY CONCEPTS USED
+-------------------------------------------------
+
+  REST API
+    The backend is structured as a REST API — Representational State
+    Transfer. This is a standard design pattern where the server exposes
+    URLs (called endpoints) that clients can send HTTP requests to.
+    Each endpoint performs one specific operation. In this project, the
+    two endpoints are: fetch all datasets, and fetch one random dataset.
+
+  MongoDB $sample Aggregation
+    MongoDB has a built-in aggregation operator called $sample that
+    returns a specified number of documents chosen at random directly
+    at the database level. This is used for the core "roulette" feature.
+    Using $sample is more efficient and truly random compared to
+    fetching all records and picking one in JavaScript.
+
+  Mongoose Schema Validation
+    When a required field is missing from a document being saved,
+    Mongoose throws a descriptive validation error before the database
+    is even touched. This protects data integrity without needing to
+    write manual validation checks for every field.
+
+  Idempotent Seed Script
+    The seed script begins by deleting all existing documents in the
+    collection before inserting new ones. This means it can be run any
+    number of times and always produces the same result — a clean set
+    of seeded data. This property is called idempotency.
+
+  Environment Variables
+    Rather than writing the database connection string directly in the
+    code (which would expose it if the code is ever shared), the value
+    is stored in a .env file and loaded at runtime using dotenv. The
+    variable is then accessed via process.env.MONGO_URI in the code.
+
+  JSX
+    JSX is a syntax extension for JavaScript used in React. It allows
+    HTML-like markup to be written directly inside JavaScript functions.
+    The browser does not understand JSX natively — a build tool (Vite
+    in this project) compiles it down to standard JavaScript before
+    the browser runs it.
+
+  React Props and State
+    State is data that belongs to a component and can change over time.
+    In this project, the fetched dataset and loading status are held as
+    state in App.jsx. Props are how a parent component passes data or
+    functions down to child components — for example, App.jsx passes
+    the "onSpin" function down to RouletteScreen as a prop.
+
+  Axios
+    A JavaScript library used to make HTTP requests from the browser.
+    It is used in the frontend to call the backend API endpoint and
+    retrieve a random dataset when the Spin button is clicked.
+
+  CORS (Cross-Origin Resource Sharing)
+    A browser security policy that blocks web pages from making requests
+    to a different domain or port than the one that served them. The
+    cors middleware in Express adds the correct response headers to
+    explicitly permit the React frontend to communicate with the backend.
+
+  Vite
+    A modern frontend build tool that replaces the older Create React App.
+    It compiles JSX, bundles JavaScript files, and serves the frontend
+    during development with near-instant hot reloading when files change.
+
+
+-------------------------------------------------
+4. API ENDPOINTS
+-------------------------------------------------
+
+  GET /api/datasets/random
+    The core endpoint of the application. Uses MongoDB's $sample
+    aggregation to select and return exactly one random document from
+    the datasets collection. Called every time the Spin button is clicked.
+
+  GET /api/datasets
+    Returns all documents in the datasets collection as a JSON array.
+    Useful for debugging and for any future feature that needs to display
+    a full list of available datasets.
+
+
+-------------------------------------------------
+5. FRONTEND COMPONENT BREAKDOWN
+-------------------------------------------------
+
+  App.jsx
+    The root component. Manages the three pieces of application state:
+    the fetched dataset, the loading status, and any error message.
+    Contains the API call logic and passes data down to child components
+    via props.
+
+  Header.jsx
+    A purely presentational component. Displays the application logo,
+    title, subtitle, and a pulsing "SYSTEM ONLINE" status indicator.
+    It receives no props and manages no state.
+
+  RouletteScreen.jsx
+    Contains the Spin button and the terminal prompt display. Implements
+    a text scramble animation using JavaScript's setInterval — on click,
+    random characters are rapidly cycled through before resolving to the
+    final button text, creating a visual effect that makes the random
+    fetch feel impactful.
+
+  DatasetCard.jsx
+    Renders the data returned from the API. Displays the dataset title,
+    description, source link, MERN challenge, ML challenge, and tags.
+    It is a purely presentational component — it receives the dataset
+    object as a prop and only handles display, no logic.
+
