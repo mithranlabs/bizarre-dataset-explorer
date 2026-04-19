@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Dataset = require('../models/dataset');
+const Dataset = require('../models/Dataset');
 
 // @desc    Get a single random dataset
 // @route   GET /api/datasets/random
